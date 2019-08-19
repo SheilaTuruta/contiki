@@ -353,7 +353,7 @@ void uip_setipid(uint16_t id);
  *
  * When the function returns, it may have an outbound packet waiting
  * for service in the uIP packet buffer, and if so the uip_len
- * variable is set to a value larger than zero. The device driver
+ * variable is set to a value larger than zero. The device driveruip_newdata
  * should be called to send out the packet.
  *
  * The usual way of calling the function is through a for() loop like

@@ -160,6 +160,8 @@ PROCESS_THREAD(udp_server_process, ev, data)
     PRINTF("No UDP connection available, exiting the process!\n");
     PROCESS_EXIT();
   }
+
+//bing the connection to server's local port
   udp_bind(server_conn, UIP_HTONS(UDP_SERVER_PORT));
 
   PRINTF("Created a server connection with remote address ");

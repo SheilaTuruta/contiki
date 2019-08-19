@@ -200,7 +200,8 @@ PROCESS_THREAD(udp_client_process, ev, data)
   PRINTF("Created a connection with the server ");
   PRINT6ADDR(&client_conn->ripaddr);
   PRINTF(" local/remote port %u/%u\n",
-	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
+	UIP_HTONS(client_conn->lport), 
+	UIP_HTONS(client_conn->rport));
 
 #if WITH_COMPOWER
   powertrace_sniff(POWERTRACE_ON);

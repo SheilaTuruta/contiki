@@ -39,10 +39,10 @@
 #define DEBUG DEBUG_PRINT
 #include "net/ip/uip-debug.h"
 
-#define SEND_INTERVAL		(15 * CLOCK_SECOND)
-#define MAX_PAYLOAD_LEN		(40)
+#define SEND_INTERVAL       (1 * CLOCK_SECOND) //alterado
+#define MAX_PAYLOAD_LEN     (40)
 #define CONN_PORT     (8802)
-#define MDNS (0)
+#define MDNS (0)    //alterado
 
 static char buf[MAX_PAYLOAD_LEN];
 
@@ -70,13 +70,15 @@ tcpip_handler(void)
 static void
 timeout_handler(void)
 {
-    char payload = 0;
+    char payload = 0x79;
 
     buf[0] = payload;
     if(uip_ds6_get_global(ADDR_PREFERRED) == NULL) {
       PRINTF("Aguardando auto-configuracao de IP\n");
       return;
     }
+    PRINTF("Enviando mensagem para:\n");
+    PRINT6ADDR(&client_conn->ripaddr);
     uip_udp_packet_send(client_conn, buf, strlen(buf));
 }
 /*---------------------------------------------------------------------------*/
@@ -117,7 +119,7 @@ set_connection_address(uip_ipaddr_t *ipaddr)
 {
 #ifndef UDP_CONNECTION_ADDR
 #if RESOLV_CONF_SUPPORTS_MDNS
-#define UDP_CONNECTION_ADDR       contiki-udp-server.local
+#define UDP_CONNECTION_ADDR       contiki-udp-server.local  //!!!!!!
 #elif UIP_CONF_ROUTER
 #define UDP_CONNECTION_ADDR       fd00:0:0:0:0212:7404:0004:0404
 #else
@@ -201,7 +203,8 @@ PROCESS_THREAD(udp_client_process, ev, data)
   }
 #else
   //configures the destination IPv6 address
-  uip_ip6addr(&ipaddr, 0xfe80, 0, 0, 0, 0x215, 0x2000, 0x0002, 0x2145);
+//  uip_ip6addr(&ipaddr, 0xfe80, 0, 0, 0, 0x215, 0x2000, 0x0002, 0x2145);
+  uip_ip6addr(&ipaddr, 0xfd00, 0, 0, 0, 0x212, 0x4b00, 0x1375, 0xd806);  //fd00::212:4b00:1375:d806     fe80::212:4b00:1375:d806
 #endif
   /* new connection with remote host */
   client_conn = udp_new(&ipaddr, UIP_HTONS(CONN_PORT), NULL);
@@ -209,7 +212,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
 
   PRINT6ADDR(&client_conn->ripaddr);
   PRINTF(" local/remote port %u/%u\n",
-	UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
+    UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
 
   etimer_set(&et, SEND_INTERVAL);
   while(1) {

@@ -39,4 +39,6 @@
 #define ENERGEST_CONF_ON (0)
 #define CC26XX_WEB_DEMO_6LBR_CLIENT (1)
 
+#define RF_CHANNEL (1) //O padrão é canal 25, se quiser o 6LBR em outro canal, é necessário definir aqui
+
 #endif /* __PROJECT_CONF_H__ */

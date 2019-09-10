@@ -7,6 +7,7 @@ ifeq ($(TARGET),)
 endif
 
 CONTIKI=../../..
+CFLAGS += -g
 
 #linker optimizations
 SMALL=1
@@ -25,4 +26,6 @@ endif
 
 CONTIKI_WITH_RPL = 0
 CONTIKI_WITH_IPV6 = 1
+
+
 include $(CONTIKI)/Makefile.include

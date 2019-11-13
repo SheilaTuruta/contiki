@@ -78,4 +78,17 @@ leds_arch_set(unsigned char leds)
   }
 }
 /*---------------------------------------------------------------------------*/
+void
+pins_arch_set(unsigned char pins)
+{
+  c = pins;
+  ti_lib_gpio_clear_multi_dio(BOARD_LED_ALL);
+
+  if((pins & LEDS_RED) == LEDS_RED) {
+    ti_lib_gpio_set_dio(BOARD_IOID_LED_1);
+  }
+  if((pins & LEDS_YELLOW) == LEDS_YELLOW) {
+    ti_lib_gpio_set_dio(BOARD_IOID_LED_2);
+  }
+}
 /** @} */

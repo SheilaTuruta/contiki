@@ -41,7 +41,12 @@
 
 #include <stdio.h> /* For printf() */
 #include "dev/leds.h"
+#include "dev/pins.h"
 
+//#include "platform/srf06-cc26xx/common/board-spi-tcc.h"
+#include "board-spi-tcc.h"
+
+#include <inttypes.h>
 
 # define LED_PING_EVENT 0x2C
 # define LED_PONG_EVENT 0x2D
@@ -92,17 +97,62 @@ PROCESS_THREAD(hello_world_process, ev, data)
 {
   PROCESS_BEGIN();
 
+  uint32_t buf[20];
+  //char* bit_info;
+  uint32_t bit_info;
+ // size_t ilen = 12;
+
   etimer_set(&et_hello, 5*CLOCK_SECOND);
   PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_TIMER);
 //  process_post(&pong_process,LED_PING_EVENT,(void *)(& hello_world_process));
 
+  GPIO_setOutputEnableDio(29, GPIO_OUTPUT_ENABLE);  // escrita de pino
+  GPIO_setOutputEnableDio(27, GPIO_OUTPUT_ENABLE);  // escrita de pino
+  GPIO_setOutputEnableDio(26, GPIO_OUTPUT_DISABLE);  // leitura de pino
   etimer_set(&et_hello, CLOCK_SECOND * 1);
   count = 0;
+//  board_spi_open(490, BOARD_IOID_DIO29);
+ // GPIO_writeDio(29, 1);
+
   while(1) {
     PROCESS_WAIT_EVENT();
     if(ev == PROCESS_EVENT_TIMER){
         process_post(&pong_process,LED_PING_EVENT,(void *)(& hello_world_process));
         leds_toggle(LEDS_RED);
+      //  pins_toggle(BOARD_IOID_DIO25);
+      //  board_spi_read(buf, ilen);
+
+        printf("comeca clock_wait 1ms\n");
+// escrita de pino
+        GPIO_toggleDio(29);
+      //  clock_delay_usec(1000);
+
+      //  GPIO_toggleDio(29);
+      //  clock_delay_usec(1000);
+       // bit_info = (unsigned int)GPIO_readDio(BOARD_IOID_DIO29);
+       // bit_info = GPIO_readDio(26);
+       // printf("leitura do pino: %X \n\n", bit_info);
+       // printf("leitura do pino2: %lu \n", (unsigned int)GPIO_readDio(BOARD_IOID_DIO26));
+      //  printf("leitura do pino3: %" PRIu32 "\n", bit_info);
+        spi_read_tcc(*buf, 16, 26, 29, 27);
+        uint16_t v;
+
+
+        GPIO_writeDio(27, 0);  // chip select
+        v = spi_read2_tcc();       // Leitura da parte alta - Primeiros 8 bits de dados
+        v <<= 8;             // Desloca 8 posições para a esquerda
+        v |= spi_read2_tcc();
+        GPIO_writeDio(27, 1);  // chip select
+//spi_read_tcc(uint8_t *buf, size_t len, uint32_t SO_dioNumber, uint32_t SCLK_dioNumber, uint32_t CS_dioNumber){    // lembrar de habilitar os pinos
+
+      //  printf("aaaaaaaa: %X \n",(unsigned int)GPIO_readDio(26));
+
+        v >>= 3;
+
+        printf("\nsaida do spi buf: %d \n", *buf*0.25);
+        printf("\nsaida do spi: %s \n", buf);
+        printf("\nsaida do spi2f: %f \n", v*0.25);
+        printf("\nsaida do spi2s: %d \n", v*0.25);
         etimer_reset(&et_hello);
         printf("HELLO: Piscando o LED vermelho!\n");
     }

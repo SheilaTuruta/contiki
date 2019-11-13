@@ -134,7 +134,7 @@ board_spi_open(uint32_t bit_rate, uint32_t clk_pin)
   ti_lib_rom_ssi_config_set_exp_clk(SSI0_BASE, ti_lib_sys_ctrl_clock_get(),
                                     SSI_FRF_MOTO_MODE_0,
                                     SSI_MODE_MASTER, bit_rate, 8);
-  ti_lib_rom_ioc_pin_type_ssi_master(SSI0_BASE, BOARD_IOID_SPI_MISO,
+  ti_lib_rom_ioc_pin_type_ssi_master(SSI0_BASE, BOARD_IOID_DIO26,
                                      BOARD_IOID_SPI_MOSI, IOID_UNUSED, clk_pin);
   ti_lib_ssi_enable(SSI0_BASE);
 
@@ -151,8 +151,8 @@ board_spi_close()
   while(!ti_lib_prcm_load_get());
 
   /* Restore pins to a low-consumption state */
-  ti_lib_ioc_pin_type_gpio_input(BOARD_IOID_SPI_MISO);
-  ti_lib_ioc_io_port_pull_set(BOARD_IOID_SPI_MISO, IOC_IOPULL_DOWN);
+  ti_lib_ioc_pin_type_gpio_input(BOARD_IOID_DIO26);
+  ti_lib_ioc_io_port_pull_set(BOARD_IOID_DIO26, IOC_IOPULL_DOWN);
 
   ti_lib_ioc_pin_type_gpio_input(BOARD_IOID_SPI_MOSI);
   ti_lib_ioc_io_port_pull_set(BOARD_IOID_SPI_MOSI, IOC_IOPULL_DOWN);
@@ -160,5 +160,48 @@ board_spi_close()
   ti_lib_ioc_pin_type_gpio_input(BOARD_IOID_SPI_CLK_FLASH);
   ti_lib_ioc_io_port_pull_set(BOARD_IOID_SPI_CLK_FLASH, IOC_IOPULL_DOWN);
 }
+
+void spi_read_tcc(uint8_t *buf, size_t len, uint32_t SO_dioNumber, uint32_t SCLK_dioNumber, uint32_t CS_dioNumber){    // lembrar de habilitar os pinos
+    len = 16;
+
+    GPIO_writeDio(CS_dioNumber, 0);  // chip select
+    while(len > 0) {    // ver se len deve ser 12 ou 16
+        uint32_t ul;
+        //ti_lib_rom_ssi_data_get(SSI0_BASE, &ul);
+
+        GPIO_writeDio(SCLK_dioNumber, 0);   //set clock to low
+        clock_delay_usec(1000); //delay 1ms
+
+        ul = GPIO_readDio(SO_dioNumber);
+        *buf = (uint8_t)ul;
+        len--;
+        buf++;
+
+        GPIO_writeDio(SCLK_dioNumber, 1);   //set clock to high
+        clock_delay_usec(1000); //delay 1ms
+    }
+    GPIO_writeDio(CS_dioNumber, 1);  // chip select
+//    return buf
+
+}
 /*---------------------------------------------------------------------------*/
+uint8_t spi_read2_tcc(){
+    int i;
+    uint8_t  d = 0;
+
+
+
+  // Laço FOR para apanhar 8 bits de cada vez
+    for (i = 7; i >= 0; i--){
+        GPIO_writeDio(29, 0);  // Borda de descida do clock - Falling Edge
+        clock_delay_usec(1000);             // Aguarda 1ms
+        if (GPIO_readDio(26)) {    // Faz a leitura do pino de dados de saída do MAX
+            d |= (1 << i);          // Armazena os bits lidos, 0 ou 1, na variável e desloca de acordo com o indice para
+        }                         // preencher todo o byte de dados
+        GPIO_writeDio(29, 1);// Borda de subida do clock - Rising Edge
+        clock_delay_usec(1000);            // Aguarda 1ms
+    }
+
+    return d;                   // Retirna o byte de leitura dos dados lidos do MAX
+}
 /** @} */

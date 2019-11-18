@@ -49,6 +49,8 @@
 #include <inttypes.h>
 #include "dev/leds.h"
 
+#include "board-spi-tcc.h"
+
 #define UDP_PORT 1883
 
 #define REQUEST_RETRIES 4
@@ -58,8 +60,8 @@
 static struct mqtt_sn_connection mqtt_sn_c;
 static char mqtt_client_id[17];
 static char ctrl_topic[22] = "0000000000000000/ctrl\0";//of form "0011223344556677/ctrl" it is null terminated, and is 21 charactes
-//static char pub_topic[21] = "0000000000000000/msg\0";
-static char pub_topic[21] = "0000000000000000/pot\0";
+static char pub_topic[21] = "0000000000000000/msg\0";
+//static char pub_topic[21] = "0000000000000000/pot\0";
 static uint16_t ctrl_topic_id;
 static uint16_t publisher_topic_id;
 static publish_packet_t incoming_packet;
@@ -86,6 +88,8 @@ PROCESS_NAME(cetic_6lbr_client_process);
 
 
 AUTOSTART_PROCESSES(&example_mqttsn_process);
+
+
 
 /*---------------------------------------------------------------------------*/
 static void
@@ -146,8 +150,21 @@ publish_receiver(struct mqtt_sn_connection *mqc, const uip_ipaddr_t *source_addr
   //printf("Published message received: %s\n", incoming_packet.data);
   int i;
   i = atoi(incoming_packet.data);
+
+
+
   printf("Published message received (as int): %d\n", i);
   //see if this message corresponds to ctrl channel subscription request
+  if (i == 1)
+  {
+      GPIO_writeDio(12, 1);
+  }
+  else
+  {
+      GPIO_writeDio(12, 0);
+  }
+
+
   if (uip_htons(incoming_packet.topic_id) == ctrl_topic_id) {
     //the new message interval will be read from the first byte of the received packet
     //send_interval = (uint8_t)incoming_packet.data[0] * CLOCK_CONF_SECOND;
@@ -187,6 +204,15 @@ PROCESS_THREAD(publish_process, ev, data)
   static uint32_t message_number;
   static char buf[20];
   static mqtt_sn_register_request *rreq = &regreq;
+  float temp;
+  uint16_t temp2;
+  int temp_int;
+  int resultado_int;
+  float resultado_intm;
+  uint16_t resultado_fc;
+
+  // start pin
+  GPIO_setOutputEnableDio(12, GPIO_OUTPUT_ENABLE);  // escrita de pino
 
   PROCESS_BEGIN();
   send_interval = DEFAULT_SEND_INTERVAL;
@@ -217,8 +243,29 @@ PROCESS_THREAD(publish_process, ev, data)
     while(1)
     {
       PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_timer));
-      sprintf(buf, "Message %" PRIu32, message_number); //removendo o warning do GCC para o uint32_t
+      //sprintf(buf, "Message %" PRIu32, message_number); //removendo o warning do GCC para o uint32_t
+      temp = temperature_read(2);
+      //temp = temperature_read(2)/4;
+      printf("temp %u\n", (unsigned int) temp);
+      //int resultado_int = temp/100;
+      //float resultado_intm = ((temp/100)-resultado_int);
+      //uint16_t resultado_fc = (resultado_intm)*100;
+      //printf("\n temperatura: %i.%u °C\n", resultado_int, resultado_fc);
+
+      //temp_int = temp;
+      //printf("\n temperatura: %i.%u °C\n", resultado_int, resultado_fc);
+
+      //sprintf(buf, "Message %i" , temp_int); //removendo o warning do GCC para o uint32_t
+      sprintf(buf, "Message %u" , (unsigned int) temp);
+
       printf("publishing at topic: %s -> msg: %s\n", pub_topic, buf);
+
+      temp = temp*25;
+      resultado_int = temp/100;
+      resultado_intm = ((temp/100)-resultado_int);
+      resultado_fc = (resultado_intm)*100;
+      printf("\n temperatura: %i.%u °C\n", resultado_int, resultado_fc);
+
       message_number++;
       buf_len = strlen(buf);
       mqtt_sn_send_publish(&mqtt_sn_c, publisher_topic_id,MQTT_SN_TOPIC_TYPE_NORMAL,buf, buf_len,qos,retain);

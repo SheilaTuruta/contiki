@@ -41,7 +41,7 @@
 
 #include <stdio.h> /* For printf() */
 #include "dev/leds.h"
-#include "dev/pins.h"
+//#include "dev/pins.h"
 
 //#include "platform/srf06-cc26xx/common/board-spi-tcc.h"
 #include "board-spi-tcc.h"
@@ -142,25 +142,25 @@ PROCESS_THREAD(hello_world_process, ev, data)
 
         GPIO_writeDio(27, 0);  // chip select
         v = spi_read2_tcc();       // Leitura da parte alta - Primeiros 8 bits de dados
-        printf("\n antes de deslocar 8 %u\n", (unsigned int) v);
-        printf("\n antes de deslocar 8 %"PRIu32" \n", v);
+      //  printf("\n antes de deslocar 8 %u\n", (unsigned int) v);
+     //   printf("\n antes de deslocar 8 %"PRIu32" \n", v);
         v <<= 8;             // Desloca 8 posições para a esquerda
-        printf("\n depois de deslocar2 8 %u\n", (unsigned int) v);
+      //  printf("\n depois de deslocar2 8 %u\n", (unsigned int) v);
         v |= spi_read2_tcc();
-        printf("\n depois do ou %u\n", (unsigned int) v);
+     //   printf("\n depois do ou %u\n", (unsigned int) v);
         GPIO_writeDio(27, 1);  // chip select
 //spi_read_tcc(uint8_t *buf, size_t len, uint32_t SO_dioNumber, uint32_t SCLK_dioNumber, uint32_t CS_dioNumber){    // lembrar de habilitar os pinos
 
       //  printf("aaaaaaaa: %X \n",(unsigned int)GPIO_readDio(26));
 
         v >>= 3;
-        printf("\n ultima rotacao %u\n", (unsigned int) v);
+     //   printf("\n ultima rotacao %u\n", (unsigned int) v);
 
         float resultado = v*25;
         int resultado_int = resultado/100;
         float resultado_intm = ((resultado/100)-resultado_int);
         uint16_t resultado_fc = (resultado_intm)*100;
-        printf("\n depois das tres giradas %i.%u \n", resultado_int, resultado_fc);
+        printf("\n temperatura: %i.%u °C\n", resultado_int, resultado_fc);
 
 
 

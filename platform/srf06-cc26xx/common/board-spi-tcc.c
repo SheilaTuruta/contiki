@@ -161,7 +161,7 @@ board_spi_close()
   ti_lib_ioc_io_port_pull_set(BOARD_IOID_SPI_CLK_FLASH, IOC_IOPULL_DOWN);
 }
 
-void spi_read_tcc(uint8_t *buf, size_t len, uint32_t SO_dioNumber, uint32_t SCLK_dioNumber, uint32_t CS_dioNumber){    // lembrar de habilitar os pinos
+void spi_read1_tcc(uint8_t *buf, size_t len, uint32_t SO_dioNumber, uint32_t SCLK_dioNumber, uint32_t CS_dioNumber){    // lembrar de habilitar os pinos
     len = 16;
 
     GPIO_writeDio(CS_dioNumber, 0);  // chip select
@@ -189,8 +189,6 @@ uint8_t spi_read2_tcc(){
     int i;
     uint8_t d = 0;
 
-
-
   // Laço FOR para apanhar 8 bits de cada vez
     for (i = 7; i >= 0; i--){
         GPIO_writeDio(29, 0);  // Borda de descida do clock - Falling Edge
@@ -203,5 +201,32 @@ uint8_t spi_read2_tcc(){
     }
 
     return d;                   // Retirna o byte de leitura dos dados lidos do MAX
+}
+
+/*---------------------------------------------------------------------------*/
+uint16_t temperature_read(uint32_t time_wait){
+
+    uint16_t v;
+    GPIO_setOutputEnableDio(29, GPIO_OUTPUT_ENABLE);  // escrita de pino
+    GPIO_setOutputEnableDio(27, GPIO_OUTPUT_ENABLE);  // escrita de pino
+    GPIO_setOutputEnableDio(26, GPIO_OUTPUT_DISABLE);  // leitura de pino
+
+    GPIO_toggleDio(29);
+    clock_wait(time_wait*CLOCK_SECOND);
+
+    GPIO_writeDio(27, 0);  // chip select
+    v = spi_read2_tcc();       // Leitura da parte alta - Primeiros 8 bits de dados
+    v <<= 8;             // Desloca 8 posições para a esquerda
+    v |= spi_read2_tcc();
+    GPIO_writeDio(27, 1);  // chip select
+    //spi_read_tcc(uint8_t *buf, size_t len, uint32_t SO_dioNumber, uint32_t SCLK_dioNumber, uint32_t CS_dioNumber){    // lembrar de habilitar os pinos
+    v >>= 3;
+  //  float resultado = v*25;
+  //  int resultado_int = resultado/100;
+  //  float resultado_intm = ((resultado/100)-resultado_int);
+  //  uint16_t resultado_fc = (resultado_intm)*100;
+  //  printf("\n temperatura: %i.%u °C\n", resultado_int, resultado_fc);
+
+    return v;
 }
 /** @} */

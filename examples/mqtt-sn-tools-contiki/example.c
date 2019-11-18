@@ -58,7 +58,8 @@
 static struct mqtt_sn_connection mqtt_sn_c;
 static char mqtt_client_id[17];
 static char ctrl_topic[22] = "0000000000000000/ctrl\0";//of form "0011223344556677/ctrl" it is null terminated, and is 21 charactes
-static char pub_topic[21] = "0000000000000000/msg\0";
+//static char pub_topic[21] = "0000000000000000/msg\0";
+static char pub_topic[21] = "0000000000000000/pot\0";
 static uint16_t ctrl_topic_id;
 static uint16_t publisher_topic_id;
 static publish_packet_t incoming_packet;
@@ -142,7 +143,10 @@ publish_receiver(struct mqtt_sn_connection *mqc, const uip_ipaddr_t *source_addr
   //publish_packet_t* pkt = (publish_packet_t*)data;
   memcpy(&incoming_packet, data, datalen);
   incoming_packet.data[datalen-7] = 0x00;
-  printf("Published message received: %s\n", incoming_packet.data);
+  //printf("Published message received: %s\n", incoming_packet.data);
+  int i;
+  i = atoi(incoming_packet.data);
+  printf("Published message received (as int): %d\n", i);
   //see if this message corresponds to ctrl channel subscription request
   if (uip_htons(incoming_packet.topic_id) == ctrl_topic_id) {
     //the new message interval will be read from the first byte of the received packet

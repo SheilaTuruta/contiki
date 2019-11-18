@@ -134,25 +134,39 @@ PROCESS_THREAD(hello_world_process, ev, data)
        // printf("leitura do pino: %X \n\n", bit_info);
        // printf("leitura do pino2: %lu \n", (unsigned int)GPIO_readDio(BOARD_IOID_DIO26));
       //  printf("leitura do pino3: %" PRIu32 "\n", bit_info);
-        spi_read_tcc(*buf, 16, 26, 29, 27);
+
+        spi_read_tcc(*buf, 16, 26, 29, 27); //(uint8_t *buf, size_t len, uint32_t SO_dioNumber, uint32_t SCLK_dioNumber, uint32_t CS_dioNumber){    // lembrar de habilitar os pinos
+
         uint16_t v;
 
 
         GPIO_writeDio(27, 0);  // chip select
         v = spi_read2_tcc();       // Leitura da parte alta - Primeiros 8 bits de dados
+        printf("\n antes de deslocar 8 %u\n", (unsigned int) v);
+        printf("\n antes de deslocar 8 %"PRIu32" \n", v);
         v <<= 8;             // Desloca 8 posições para a esquerda
+        printf("\n depois de deslocar2 8 %u\n", (unsigned int) v);
         v |= spi_read2_tcc();
+        printf("\n depois do ou %u\n", (unsigned int) v);
         GPIO_writeDio(27, 1);  // chip select
 //spi_read_tcc(uint8_t *buf, size_t len, uint32_t SO_dioNumber, uint32_t SCLK_dioNumber, uint32_t CS_dioNumber){    // lembrar de habilitar os pinos
 
       //  printf("aaaaaaaa: %X \n",(unsigned int)GPIO_readDio(26));
 
         v >>= 3;
+        printf("\n ultima rotacao %u\n", (unsigned int) v);
 
-        printf("\nsaida do spi buf: %d \n", *buf*0.25);
-        printf("\nsaida do spi: %s \n", buf);
-        printf("\nsaida do spi2f: %f \n", v*0.25);
-        printf("\nsaida do spi2s: %d \n", v*0.25);
+        float resultado = v*25;
+        int resultado_int = resultado/100;
+        float resultado_intm = ((resultado/100)-resultado_int);
+        uint16_t resultado_fc = (resultado_intm)*100;
+        printf("\n depois das tres giradas %i.%u \n", resultado_int, resultado_fc);
+
+
+
+        printf("\nsaida do spi buf: %u \n", *buf);
+        printf("\nsaida do spi: %u \n", (unsigned int)buf/4);
+
         etimer_reset(&et_hello);
         printf("HELLO: Piscando o LED vermelho!\n");
     }

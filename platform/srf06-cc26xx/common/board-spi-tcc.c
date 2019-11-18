@@ -187,7 +187,7 @@ void spi_read_tcc(uint8_t *buf, size_t len, uint32_t SO_dioNumber, uint32_t SCLK
 /*---------------------------------------------------------------------------*/
 uint8_t spi_read2_tcc(){
     int i;
-    uint8_t  d = 0;
+    uint8_t d = 0;
 
 
 

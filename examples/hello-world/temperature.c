@@ -56,10 +56,12 @@ PROCESS_THREAD(hello_world_process, ev, data)
       //  pins_toggle(BOARD_IOID_DIO25);
       //  board_spi_read(buf, ilen);
 
-        printf("clock_wait 2s\n");
+        //printf("clock_wait 2s\n");
 // escrita de pino
         GPIO_toggleDio(29);
-        clock_wait(2*CLOCK_SECOND);//s?
+        //clock_wait(2*CLOCK_SECOND);//s?
+        printf("clock_wait 1s\n")
+        clock_wait(CLOCK_SECOND);
 
       //  GPIO_toggleDio(29);
       //  clock_delay_usec(1000);

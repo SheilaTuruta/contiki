@@ -204,12 +204,12 @@ PROCESS_THREAD(publish_process, ev, data)
   static uint32_t message_number;
   static char buf[20];
   static mqtt_sn_register_request *rreq = &regreq;
-  float temp;
-  uint16_t temp2;
-  int temp_int;
-  int resultado_int;
-  float resultado_intm;
-  uint16_t resultado_fc;
+  float temp = 0;
+  uint16_t temp2 = 0;
+  int temp_int = 0;
+  int resultado_int = 0;
+  float resultado_intm = 0;
+  uint16_t resultado_fc = 0;
 
   // start pin
   GPIO_setOutputEnableDio(12, GPIO_OUTPUT_ENABLE);  // escrita de pino
@@ -243,8 +243,8 @@ PROCESS_THREAD(publish_process, ev, data)
     while(1)
     {
       PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_timer));
-      //sprintf(buf, "Message %" PRIu32, message_number); //removendo o warning do GCC para o uint32_t
-      temp = temperature_read(2);
+     // sprintf(buf, "Message %" PRIu32, message_number); //removendo o warning do GCC para o uint32_t
+      temp = temperature_read();
       //temp = temperature_read(2)/4;
       printf("temp %u\n", (unsigned int) temp);
       //int resultado_int = temp/100;
@@ -254,16 +254,18 @@ PROCESS_THREAD(publish_process, ev, data)
 
       //temp_int = temp;
       //printf("\n temperatura: %i.%u °C\n", resultado_int, resultado_fc);
-
+      //temp = temp/4;
       //sprintf(buf, "Message %i" , temp_int); //removendo o warning do GCC para o uint32_t
-      sprintf(buf, "Message %u" , (unsigned int) temp);
+      //sprintf(buf, "Message %u" , (unsigned int) temp);
 
       printf("publishing at topic: %s -> msg: %s\n", pub_topic, buf);
 
       temp = temp*25;
+
       resultado_int = temp/100;
       resultado_intm = ((temp/100)-resultado_int);
       resultado_fc = (resultado_intm)*100;
+      sprintf(buf, "%i.%u" , resultado_int, resultado_fc);
       printf("\n temperatura: %i.%u °C\n", resultado_int, resultado_fc);
 
       message_number++;

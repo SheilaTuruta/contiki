@@ -1,5 +1,6 @@
 #all: udp-client-rpl-localization example
-all: example
+all: tcc_read_sensor
+#all: example
 
 WITH_UIP6=1
 UIP_CONF_IPV6=1

@@ -54,13 +54,14 @@
 #define UDP_PORT 1883
 
 #define REQUEST_RETRIES 4
-#define DEFAULT_SEND_INTERVAL		(10 * CLOCK_SECOND)
+#define DEFAULT_SEND_INTERVAL       (10 * CLOCK_SECOND)
 #define REPLY_TIMEOUT (3 * CLOCK_SECOND)
 
 static struct mqtt_sn_connection mqtt_sn_c;
 static char mqtt_client_id[17];
 static char ctrl_topic[22] = "0000000000000000/ctrl\0";//of form "0011223344556677/ctrl" it is null terminated, and is 21 charactes
 static char pub_topic[21] = "0000000000000000/msg\0";
+//static char pub_topic[23] = "0000000000000000/0/msg\0";
 //static char pub_topic[21] = "0000000000000000/pot\0";
 static uint16_t ctrl_topic_id;
 static uint16_t publisher_topic_id;
@@ -141,6 +142,7 @@ suback_receiver(struct mqtt_sn_connection *mqc, const uip_ipaddr_t *source_addr,
   }
 }
 /*---------------------------------------------------------------------------*/
+
 static void
 publish_receiver(struct mqtt_sn_connection *mqc, const uip_ipaddr_t *source_addr, const uint8_t *data, uint16_t datalen)
 {
@@ -155,14 +157,14 @@ publish_receiver(struct mqtt_sn_connection *mqc, const uip_ipaddr_t *source_addr
 
   printf("Published message received (as int): %d\n", i);
   //see if this message corresponds to ctrl channel subscription request
- /* if (i == 1)
+  if (i == 1)
   {
       GPIO_writeDio(12, 1);
   }
   else
   {
       GPIO_writeDio(12, 0);
-  }*/
+  }
 
 
   if (uip_htons(incoming_packet.topic_id) == ctrl_topic_id) {
@@ -201,18 +203,23 @@ PROCESS_THREAD(publish_process, ev, data)
   static uint8_t registration_tries;
   static struct etimer send_timer;
   static uint8_t buf_len;
-  static uint32_t message_number;
-  static char buf[20];
+  static char buf[3][20];
   static mqtt_sn_register_request *rreq = &regreq;
-  float temp = 0;
-  //float temp2 = 0;
-  //float temp3 = 0;
+  float temp [3] ;
   //uint16_t temp2 = 0;
   int temp_int = 0;
-  int resultado_int = 0;
-  float resultado_intm = 0;
-  uint16_t resultado_fc = 0;
-  enable_spi_pin(29,27,4);
+  int resultado_int [3] ;
+  float resultado_intm [3] ;
+  uint16_t resultado_fc [3];
+  int i;
+  // sck - clock / cs - chip select / so - serial data output
+  // obs 21,22,23,24,27,30,28 nao funciona para read (SO)
+  // obs 24,22,25,27,29,30,23 funciona para write (SO)
+  // obs 26,12,15 funciona para read (SO)
+  enable_spi_pin(23,22,12);
+  enable_spi_pin(24,27,4);
+  enable_spi_pin(28,29,15);
+
 
   // start pin
   //GPIO_setOutputEnableDio(12, GPIO_OUTPUT_ENABLE);  // escrita de pino
@@ -247,29 +254,28 @@ PROCESS_THREAD(publish_process, ev, data)
     {
       PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_timer));
       // sck - clock / cs - chip select / so - serial data output
-      // obs 21,22,23,24,27,30,28 nao funciona para read (SO)
-      // obs 24,22,25,27,29,30,23 funciona para write (SO)
-      // obs 26,12,15 funciona para read (SO)
-      // ACHAR OS READ
-      temp = temperature_read(29,27,4); //24,22,23
-      //temp = temperature_read(25,27,26);  //25,26,27     OK
-      //temp3 = temperature_read(28,29,30);  //28,29,30
+      temp [0] = temperature_read(23,22,4);
+      temp [1] = temperature_read(24,27,12);
+      temp [2] = temperature_read(28,29,15);
 
-      printf("temp %u\n", (unsigned int) temp);
+      //printf("temp %u\n", (unsigned int) temp);
 
       printf("publishing at topic: %s -> msg: %s\n", pub_topic, buf);
 
-      temp = temp*25;
+      for (i=0; i<3; i++){
 
-      resultado_int = temp/100;
-      resultado_intm = ((temp/100)-resultado_int);
-      resultado_fc = (resultado_intm)*100;
-      sprintf(buf, "%i.%u" , resultado_int, resultado_fc);
-      printf("\n temperatura: %i.%u °C\n", resultado_int, resultado_fc);
+          temp[i] = temp[i]*25;
+          resultado_int[i] = temp[i]/100;
+          resultado_intm[i]  = ((temp[i] /100)-resultado_int[i] );
+          resultado_fc[i]  = (resultado_intm[i] )*100;
+          sprintf(buf[i] , "%i %i.%u" , i+4, resultado_int[i] , resultado_fc[i] );
+          printf("\n temperatura: %i.%u °C\n", resultado_int[i] , resultado_fc[i] );
+          buf_len = strlen(buf[i]);
+          mqtt_sn_send_publish(&mqtt_sn_c, publisher_topic_id,MQTT_SN_TOPIC_TYPE_NORMAL,buf[i], buf_len,qos,retain);
+      }
 
-      message_number++;
-      buf_len = strlen(buf);
-      mqtt_sn_send_publish(&mqtt_sn_c, publisher_topic_id,MQTT_SN_TOPIC_TYPE_NORMAL,buf, buf_len,qos,retain);
+
+
       /*if (ctimer_expired(&(mqtt_sn_c.receive_timer)))
       {
           process_post(&example_mqttsn_process, (process_event_t)(NULL), (process_event_t)(41));

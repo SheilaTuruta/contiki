@@ -37,10 +37,12 @@ PROCESS_THREAD(temperature_process, ev, data)
   enable_spi_pin(23,22, 4);
   enable_spi_pin(24,27,12);
   enable_spi_pin(28,29,15);
+  GPIO_setOutputEnableDio(26, GPIO_OUTPUT_ENABLE); // pin enable 3.3V
+  GPIO_writeDio(26, 1);
 
   PROCESS_BEGIN();
 
-  etimer_set(&et_temperature_process, 5*CLOCK_SECOND);
+  etimer_set(&et_temperature_process, 1*CLOCK_SECOND);
 
 
    while(1){
@@ -56,8 +58,10 @@ PROCESS_THREAD(temperature_process, ev, data)
          resultado_int[i] = temp[i]/100;
          resultado_intm[i]  = ((temp[i] /100)-resultado_int[i] );
          resultado_fc[i]  = (resultado_intm[i] )*100;
-         printf("\n temperatura sensor %i: %i.%u °C\n", i+1, resultado_int[i] , resultado_fc[i] );
+        // printf("temperatura sensor %i: %i.%u °C\n", i+1, resultado_int[i] , resultado_fc[i] );
+         printf("\n temperatura sensor %i: %i.%u °C\n", i+4, resultado_int[i] , resultado_fc[i] );
     }
+    printf("\n");
     etimer_reset(&et_temperature_process);
    }
    PROCESS_END();

@@ -39,19 +39,19 @@ PROCESS_THREAD(hello_world_process, ev, data)
 //  etimer_set(&et_hello, 5*CLOCK_SECOND);
  // PROCESS_WAIT_EVENT_UNTIL(ev == PROCESS_EVENT_TIMER);
 //  process_post(&pong_process,LED_PING_EVENT,(void *)(& hello_world_process));
-  GPIO_setOutputEnableDio(21, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(22, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(23, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(24, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(25, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(26, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(27, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(28, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(29, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(30, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(12, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(3, GPIO_OUTPUT_DISABLE);
-  GPIO_setOutputEnableDio(4, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_21, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_22, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_23, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_24, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_25, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_26, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_27, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_28, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_29, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_30, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_12, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_3, GPIO_OUTPUT_DISABLE);
+  GPIO_setOutputEnableDio(IOID_4, GPIO_OUTPUT_DISABLE);
 
 /*
   GPIO_setOutputEnableDio(21, GPIO_OUTPUT_ENABLE);
@@ -132,20 +132,20 @@ PROCESS_THREAD(hello_world_process, ev, data)
         GPIO_toggleDio(12);
         GPIO_toggleDio(15);*/
 
-        printf("\n pin21: %u °C", GPIO_readDio(21));
-        printf("\n pin22: %u °C", GPIO_readDio(22));
-        printf("\n pin23: %u °C", GPIO_readDio(23));
-        printf("\n pin24: %u °C", GPIO_readDio(24));
-        printf("\n pin25: %u °C", GPIO_readDio(25));
-        printf("\n pin26: %u °C", GPIO_readDio(26));
-        printf("\n pin27: %u °C", GPIO_readDio(27));
-        printf("\n pin28: %u °C", GPIO_readDio(28));
-        printf("\n pin29: %u °C", GPIO_readDio(29));
-        printf("\n pin30: %u °C", GPIO_readDio(30));
-        printf("\n pin11: %u °C", GPIO_readDio(11));
-        printf("\n pin12: %u °C", GPIO_readDio(12));
-        printf("\n pin4: %u °C\n", GPIO_readDio(4));
-        printf("\n pin3: %u °C\n", GPIO_readDio(3));
+        printf("\n pin21: %X °C\r", (unsigned int)GPIO_readDio(IOID_21));
+        printf("\n pin22: %X °C\r", (unsigned int)GPIO_readDio(IOID_22));
+        printf("\n pin23: %X °C\r", (unsigned int)GPIO_readDio(IOID_23));
+        printf("\n pin24: %X °C\r", (unsigned int)GPIO_readDio(IOID_24));
+        printf("\n pin25: %X °C\r", (unsigned int)GPIO_readDio(IOID_25));
+        printf("\n pin26: %X °C\r", (unsigned int)GPIO_readDio(IOID_26));
+        printf("\n pin27: %X °C\r", (unsigned int)GPIO_readDio(IOID_27));
+        printf("\n pin28: %X °C\r", (unsigned int)GPIO_readDio(IOID_28));
+        printf("\n pin29: %X °C\r", (unsigned int)GPIO_readDio(IOID_29));
+        printf("\n pin30: %X °C\r", (unsigned int)GPIO_readDio(IOID_30));
+        printf("\n pin11: %X °C\r", (unsigned int)GPIO_readDio(IOID_11));
+        printf("\n pin12: %X °C\r", (unsigned int)GPIO_readDio(IOID_12));
+        printf("\n pin4: %u °C", GPIO_readDio(IOID_4));
+        printf("\n pin3: %u °C\n", GPIO_readDio(IOID_3));
 
    // }
 

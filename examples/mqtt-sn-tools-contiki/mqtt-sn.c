@@ -85,7 +85,7 @@ mqtt_sn_receiver(struct simple_udp_connection *sock, const uip_ipaddr_t *sender_
   struct mqtt_sn_connection *mqc = (struct mqtt_sn_connection *)sock;
   if (mqc->keep_alive > 0 && mqc->stat == MQTTSN_CONNECTED){
     ctimer_restart((&(mqc->receive_timer)));
-    printf("receive timer reset\n");
+    //printf("receive timer reset\n");  // commented at 12-02-2020 (Naomi)
   }
   if (datalen >= 2)
   {

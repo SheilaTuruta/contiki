@@ -25,7 +25,6 @@
   Copyright (C) 2013 Adam Renner
 */
 
-
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"
@@ -87,10 +86,7 @@ PROCESS(publish_process, "register topic and publish data");
 PROCESS(ctrl_subscription_process, "subscribe to a device control channel");
 PROCESS_NAME(cetic_6lbr_client_process);
 
-
 AUTOSTART_PROCESSES(&example_mqttsn_process);
-
-
 
 /*---------------------------------------------------------------------------*/
 static void
@@ -152,9 +148,6 @@ publish_receiver(struct mqtt_sn_connection *mqc, const uip_ipaddr_t *source_addr
   //printf("Published message received: %s\n", incoming_packet.data);
   int i;
   i = atoi(incoming_packet.data);
-
-
-
   printf("Published message received (as int): %d\n", i);
   //see if this message corresponds to ctrl channel subscription request
   if (i == 1)
@@ -166,12 +159,12 @@ publish_receiver(struct mqtt_sn_connection *mqc, const uip_ipaddr_t *source_addr
       GPIO_writeDio(12, 0);
   }
 
-
   if (uip_htons(incoming_packet.topic_id) == ctrl_topic_id) {
     //the new message interval will be read from the first byte of the received packet
     //send_interval = (uint8_t)incoming_packet.data[0] * CLOCK_CONF_SECOND;
       send_interval = 10 * CLOCK_CONF_SECOND;
-  } else {
+  }
+  else {
     printf("unknown publication received\n");
   }
 
@@ -206,7 +199,6 @@ PROCESS_THREAD(publish_process, ev, data)
   static char buf[3][20];
   static mqtt_sn_register_request *rreq = &regreq;
   float temp [3] ;
-  //uint16_t temp2 = 0;
   int temp_int = 0;
   int resultado_int [3] ;
   float resultado_intm [3] ;
@@ -219,8 +211,6 @@ PROCESS_THREAD(publish_process, ev, data)
   enable_spi_pin(23,22,12);
   enable_spi_pin(24,27,4);
   enable_spi_pin(28,29,15);
-
-
   // start pin
   //GPIO_setOutputEnableDio(12, GPIO_OUTPUT_ENABLE);  // escrita de pino
 
@@ -231,7 +221,6 @@ PROCESS_THREAD(publish_process, ev, data)
   registration_tries =0;
   while (registration_tries < REQUEST_RETRIES)
   {
-
     reg_topic_msg_id = mqtt_sn_register_try(rreq,&mqtt_sn_c,pub_topic,REPLY_TIMEOUT);
     //PROCESS_WAIT_EVENT_UNTIL(mqtt_sn_request_returned(rreq));
     etimer_set(&send_timer, 5*CLOCK_SECOND);
